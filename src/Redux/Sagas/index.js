@@ -1,22 +1,23 @@
 import { all } from 'redux-saga/effects';
-import bestOfferSaga from './bestOffersSaga';
-import userSaga from './userSaga';
-import projectEstimationSaga from './projectEstimationSaga'
-import registerAsProfessionalSaga from './registerAsProfessionalSaga'
-import servicesSaga from './serviceSaga';
-import updateProfileSaga from './updateProfileSaga';
-import bannerSaga from './bannersSaga';
-import addToCartSaga from './addToCartSaga';
+import userSaga from './usersagas';
+import categorySaga from './categorySagas';
+import professionalSaga from './professionalSagas';
+import servicesSaga from './serviceSagas';
+import orderSaga from './orderSagas';
+import bannerSaga from './bannerSagas';
+import offerSaga from './offerSagas';
+import estimationSaga from './estimationSagas';
+
 
 export default function* rootSaga() {
-    yield all([
-        userSaga(),
-        projectEstimationSaga(),
-        registerAsProfessionalSaga(),
-        bestOfferSaga(),
-        servicesSaga(),
-        updateProfileSaga(),
-        bannerSaga(),
-        addToCartSaga(),
-    ])
+   yield all([
+    userSaga(),
+    categorySaga(),
+    professionalSaga(),
+    servicesSaga(),
+    orderSaga(),
+    bannerSaga(),
+    offerSaga(),
+    estimationSaga(),
+   ]);
 }

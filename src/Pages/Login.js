@@ -1,161 +1,132 @@
-import React, { useEffect, useState } from 'react';
-import {
-  MDBContainer,
-  MDBRow,
-  MDBCol,
-  MDBCard,
-  MDBCardBody,
-  MDBInput,
-  MDBValidation,
-  MDBValidationItem,
-  MDBBtn,
-} from 'mdb-react-ui-kit';
-import './Login.css'
-import { userLoginStart } from '../Redux/Actions/userActions';
-
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-const emailRegx =  /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+import React, { useEffect, useState } from "react";
+import { InputText } from "primereact/inputtext";
+import classNames from "classnames";
+import { useHistory } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { adminLoginStart } from "../redux/Actions/actions";
+import { Password } from "primereact/password";
+import { Button } from "primereact/button";
+import { Link } from "react-router-dom";
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 const Login = () => {
+    const users = useSelector((state) => state?.loginData?.loginData);
+    const [submitted, setSubmitted] = useState(false);
+    const [data, setData] = useState({
+        email: "",
+        password: "",
+    });
 
-  const [loaderState, setloaderState] = useState(false)
-  const userLoginData = useSelector((state) => state?.userData?.user)
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [data, setData] = useState({
-    email: "",
-    password: "",
-  });
 
-  const [ErrorSignupInputes, setErrorSignupInputes] = useState({ ...data })
-  const [submit, setsubmit] = useState(false)
-
-  const handleInput = (e) => {
-    const { name, value } = e.target
-    setData({
-      ...data, [name]: value,
-    })
-
-    switch (name) {
-      case "email":
-        if (!value) {
-          ErrorSignupInputes.email = value.length > 0 ? "" : "Enter your email"
-        }
-        else {
-          ErrorSignupInputes.email = emailRegx.test(value) === false && "Enter your valid email"
-        }
-        break;
-      case "password":
-        ErrorSignupInputes.password = value.length > 0 ? "" : "Enter your password"
-        break;
-
-    }
-    setErrorSignupInputes(ErrorSignupInputes)
-  }
-
-  function validate(value) {
-    if (!data.email) {
-      ErrorSignupInputes.email = "Enter email"
-    }
-    if (!data.password) {
-      ErrorSignupInputes.password = "Enter password"
-    }
-    return ErrorSignupInputes
-  }
-
-  useEffect(() => {
-    if (Object.keys(ErrorSignupInputes).length === 0 && Object.keys(data).length !== 0) {
-
-    }
-  }, [])
-
-  const handleSubmit = (e) => { 
-    e.preventDefault();
-    setsubmit(true)
-    setErrorSignupInputes(validate(data));
-
-    if (data.email !== "" && emailRegx.test(data.email) && data.password !== "" ) {
-      var loginData = {
-        email: data.email,
-        password: data.password
-      }
-      setloaderState(true)
-      setTimeout(() => {
-        dispatch(userLoginStart(loginData));
-        setloaderState(false)
-      }, 2000);
-    }
-  }
+    // useEffect(() => {
+    //     if(submitted){
+    //         dispatch(adminLoginStart(data));
+    //     }
+    // }, [submitted]);
     
-  if (userLoginData?.message === "Login successful") {
-    navigate('/');
-    // window.location.reload();
-  }
 
-  return (
-    <>
-      {loaderState && <div class="lds-hourglass loader"></div>}
-      <MDBContainer fluid className='p-4 background-radial-gradient overflow-hidden'>
+    const history = useHistory();
+    const dispatch = useDispatch();
 
-        <MDBRow className="justify-content-center align-item-center p-0">
+    const validateEmail = (email) => {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    };
 
-          <MDBCol md='6' className='text-center text-md-start d-flex flex-column justify-content-center'>
+    const handleChange = (e) => {
+        const value = e.target.value;
+        setData({
+            ...data,
+            [e.target.name]: value,
+        });
+    };
 
-            <h1 className="my-5 display-3 fw-bold ls-tight px-3" style={{ color: 'hsl(218, 81%, 95%)' }}>
-              Horray..!!<br />
-              <span style={{ color: 'hsl(218, 81%, 75%)' }}>Welcome again</span>
-            </h1>
+    const handleSubmit = (e) => {
+        e.preventDefault();  
+        setSubmitted(true);
+        if (data.email && validateEmail(data.email) && data.password) {
+        setData(data)
+        dispatch(adminLoginStart(data));
+        }
+    };
 
-            <h4 className='px-3' style={{ color: 'hsl(218, 81%, 85%)' }}>
-              You will never struggle to find a professionals for your home services
-            </h4 >
+    // useEffect(() => {
+    //     if(submitted){
+    //         dispatch(adminLoginStart(data));
+    //     }
+    // }, [submitted]);
 
-          </MDBCol>
-
-          <MDBCol md='4' className='position-relative'>
-
-            <div id="radius-shape-1" className="position-absolute rounded-circle shadow-5-strong"></div>
-            <div id="radius-shape-2" className="position-absolute shadow-5-strong"></div>
-
-            <MDBCard className='my-5 bg-glass'>
-
-              <MDBCardBody className='p-5'>
-
-                <div className='p-2 justify-content-center align-item-center'> <h1 >LogIn</h1> </div>
-
-                <MDBValidation className='row g-3' onSubmit={handleSubmit}>
-
-                  <div className='sub_div'>
-                    <label className='lable-cstm'>Email</label>
-                    <MDBInput wrapperClass='mb-4' type='email' name='email' id='email' onChange={handleInput} required />
-                    <span className='cstm_error'>{ErrorSignupInputes.email}</span>
-
-                  </div>
-
-                <div className='sub_div'>
-                  <label className='lable-cstm'>Password</label>
-                  <MDBInput wrapperClass='mb-4' id='password' type='password' name='password' onChange={handleInput} required />
-                  <span className='cstm_error'>{ErrorSignupInputes.password}</span>
+    if (users?.message === "Login successful") {
+        history.push("/admindashboard");
+        window.location.reload();
+    }
+    return (
+        <div className="flex justify-content-center border-round mt-8">
+            <div className="card w-30rem ">
+                <div className="flex justify-content-center">
+                    <img src='assets/layout/images/logo.png' alt="logo"  style={{ width:'50%'}}/>
                 </div>
-                  
-                  <MDBBtn noRipple={true} type='submit' value='Submit' className='mr-2'>LogIn</MDBBtn>
 
-                  <div className="text-center">
-                    <p>Don’t have an account? <span className='sign_in' onClick={() => navigate('/signup')}> Sign Up </span> </p>
-                    <p>Forgot Password? <span className='sign_in' onClick={() => navigate('/forgot-password')}>Forgot Password? </span> </p>
-                  </div>
-                </MDBValidation>
-              </MDBCardBody>
-            </MDBCard>
-          </MDBCol>
-        </MDBRow>
-      </MDBContainer>
+                <h3 className="text-center mb-8">LOG IN</h3>
+                <form onSubmit={handleSubmit} className="p-fluid">
+                    <div className="formgrid grid">
+                        <div className="field col">
+                            <label>Email Address</label>
+                        </div>
 
-    </>
+                        <div className="field col p-input-icon-right">
+                            <InputText 
+                                className={classNames({ "p-invalid": submitted && !validateEmail(data.email) })} 
+                                id="email" 
+                                name="email" 
+                                label="Email Address" 
+                                placeholder="test@test.com" 
+                                value={data.email} 
+                                onChange={handleChange}
+                            />
+                            {submitted && !data.email && <small className="p-error">Email is required.</small> || submitted && !validateEmail(data.email) && <small className="p-error">Please Enter Valid Email!</small>}
+                        </div>
+                       
+                    </div>
 
-  );
-}
+                    <div className="formgrid grid">
+                        <div className="field col">
+                            <label>Enter Password</label>
+                        </div>
+
+                        <div className="field col">
+                            <Password 
+                                className={classNames({ "p-invalid": submitted && !data.password })} 
+                                id="password" 
+                                name="password" 
+                                label="password" 
+                                type="password" 
+                                value={data.password} 
+                                onChange={handleChange} 
+                                toggleMask 
+                                feedback={false} />
+                            {submitted && !data.password && <small className="p-error">Password is required.</small>}
+                        </div>
+                        <div></div>
+                    </div>
+
+                    <div className="formgrid grid">
+                        <div className="field col">
+                            <Button label="Log In" icon="pi pi-check" className="p-button-success mr-2 mb-1"  />
+                        </div>
+                    </div>
+                    <div className="formgrid grid">
+                        <div className="field col">
+                        <Link to={`/forgot-password`}>
+                            <Button label="Forgot Password?" className="p-button-text" />
+                        </Link>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
 
 export default Login;
 
